@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+sqlalchemy
+langchain
+langgraph
+langchain-core
+pydantic
+websockets
+python-multipart
+jinja2
+python-dotenv
+asyncio
+aiofiles
+typing-extensions

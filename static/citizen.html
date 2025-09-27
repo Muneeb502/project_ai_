@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frontline Support - Citizen Portal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2196F3, #21CBF3);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            padding: 40px;
+        }
+
+        .form-section, .status-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #fafafa;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #2196F3;
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.2);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #2196F3, #21CBF3);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            justify-content: center;
+            min-width: 150px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(33, 150, 243, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2196F3;
+            transition: all 0.3s ease;
+        }
+
+        .status-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-submitted { background: #fff3cd; color: #856404; }
+        .status-triaged { background: #d4edda; color: #155724; }
+        .status-assigned { background: #d1ecf1; color: #0c5460; }
+        .status-scheduled { background: #f8d7da; color: #721c24; }
+        .status-completed { background: #d4edda; color: #155724; }
+
+        .urgency-critical { border-left-color: #dc3545; }
+        .urgency-high { border-left-color: #fd7e14; }
+        .urgency-medium { border-left-color: #ffc107; }
+        .urgency-low { border-left-color: #28a745; }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: all 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: linear-gradient(135deg, #28a745, #20c997);
+        }
+
+        .notification.error {
+            background: linear-gradient(135deg, #dc3545, #e83e8c);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .loading::after {
+            content: "";
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #2196F3;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .real-time-updates {
+            background: #e3f2fd;
+            border: 1px solid #2196F3;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        .update-item {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(33, 150, 243, 0.2);
+        }
+
+        .update-item:last-child {
+            border-bottom: none;
+        }
+
+        .update-time {
+            font-size: 12px;
+            color: #666;
+            float: right;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+
+        .icon {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Citizen Support Portal</h1>
+            <p>Get help from our AI-powered frontline worker system</p>
+        </div>
+
+        <div class="main-content">
+            <!-- Case Submission Form -->
+            <div class="form-section">
+                <div class="section-title">
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                    Submit New Case
+                </div>
+
+                <form id="caseForm">
+                    <div class="form-group">
+                        <label for="citizenId">Citizen ID</label>
+                        <select id="citizenId" required>
+                            <option value="">Select your profile</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="title">Case Title</label>
+                        <input type="text" id="title" placeholder="Brief description of your request" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Detailed Description</label>
+                        <textarea id="description" placeholder="Please describe your situation in detail..." required></textarea>
+                    </div>
+
+                    <button type="submit" class="btn" id="submitBtn">
+                        <svg class="icon" viewBox="0 0 24 24">
+                            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                        </svg>
+                        Submit Case
+                    </button>
+                </form>
+            </div>
+
+            <!-- Case Status Section -->
+            <div class="status-section">
+                <div class="section-title">
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                    Your Cases
+                </div>
+
+                <div id="casesContainer">
+                    <div class="loading">Loading your cases...</div>
+                </div>
+
+                <div class="real-time-updates" id="realTimeUpdates" style="display: none;">
+                    <h4>🔄 Real-time Updates</h4>
+                    <div id="updatesContainer"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000/api';
+        let currentCaseId = null;
+        let websocket = null;
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCitizens();
+            loadCases();
+            setupEventListeners();
+        });
+
+        // Load citizens for the dropdown
+        async function loadCitizens() {
+            try {
+                // For demo purposes, we'll create some sample citizens if they don't exist
+                const citizens = [
+                    { id: 1, name: "John Doe" },
+                    { id: 2, name: "Sarah Smith" },
+                    { id: 3, name: "Robert Johnson" }
+                ];
+
+                const select = document.getElementById('citizenId');
+                citizens.forEach(citizen => {
+                    const option = document.createElement('option');
+                    option.value = citizen.id;
+                    option.textContent = `${citizen.name} (ID: ${citizen.id})`;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                showNotification('Error loading citizens', 'error');
+            }
+        }
+
+        // Load existing cases
+        async function loadCases() {
+            try {
+                const response = await fetch(`${API_BASE}/cases/`);
+                const cases = await response.json();
+                
+                const container = document.getElementById('casesContainer');
+                
+                if (cases.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: #666;">No cases found. Submit your first case above!</p>';
+                    return;
+                }
+
+                container.innerHTML = cases.map(case_ => `
+                    <div class="status-card urgency-${case_.urgency}" data-case-id="${case_.id}">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                            <h4>${case_.title}</h4>
+                            <span class="status-badge status-${case_.status}">${case_.status}</span>
+                        </div>
+                        <p style="color: #666; margin-bottom: 10px;">${case_.description.substring(0, 100)}${case_.description.length > 100 ? '...' : ''}</p>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <small style="color: #888;">Urgency: <strong>${case_.urgency.toUpperCase()}</strong></small>
+                            <button onclick="viewCaseDetails(${case_.id})" class="btn" style="padding: 8px 16px; font-size: 14px;">
+                                View Details
+                            </button>
+                        </div>
+                        ${case_.appointment_time ? `
+                            <div style="margin-top: 10px; padding: 10px; background: rgba(33, 150, 243, 0.1); border-radius: 8px;">
+                                <strong>📅 Appointment:</strong> ${new Date(case_.appointment_time).toLocaleString()}
+                            </div>
+                        ` : ''}
+                    </div>
+                `).join('');
+
+            } catch (error) {
+                document.getElementById('casesContainer').innerHTML = 
+                    '<p style="color: red; text-align: center;">Error loading cases</p>';
+            }
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            document.getElementById('caseForm').addEventListener('submit', handleSubmitCase);
+        }
+
+        // Handle case submission
+        async function handleSubmitCase(event) {
+            event.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.innerHTML;
+            
+            submitBtn.innerHTML = '<div class="loading">Submitting...</div>';
+            submitBtn.disabled = true;
+
+            try {
+                const formData = {
+                    citizen_id: parseInt(document.getElementById('citizenId').value),
+                    title: document.getElementById('title').value,
+                    description: document.getElementById('description').value
+                };
+
+                const response = await fetch(`${API_BASE}/cases/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showNotification('Case submitted successfully! Processing...', 'success');
+                    document.getElementById('caseForm').reset();
+                    
+                    // Connect to WebSocket for real-time updates
+                    connectWebSocket(result.case_id);
+                    
+                    // Reload cases
+                    setTimeout(() => loadCases(), 1000);
+                } else {
+                    throw new Error(result.detail || 'Submission failed');
+                }
+
+            } catch (error) {
+                showNotification(`Error: ${error.message}`, 'error');
+            } finally {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+
+        // Connect to WebSocket for real-time updates
+        function connectWebSocket(caseId) {
+            currentCaseId = caseId;
+            
+            if (websocket) {
+                websocket.close();
+            }
+
+            try {
+                websocket = new WebSocket(`ws://localhost:8000/ws/${caseId}`);
+                
+                websocket.onopen = function() {
+                    console.log('WebSocket connected for case:', caseId);
+                    document.getElementById('realTimeUpdates').style.display = 'block';
+                };
+
+                websocket.onmessage = function(event) {
+                    const data = JSON.parse(event.data);
+                    handleRealTimeUpdate(data);
+                };
+
+                websocket.onclose = function() {
+                    console.log('WebSocket disconnected');
+                };
+
+                websocket.onerror = function(error) {
+                    console.error('WebSocket error:', error);
+                };
+
+            } catch (error) {
+                console.error('Failed to connect WebSocket:', error);
+            }
+        }
+
+        // Handle real-time updates
+        function handleRealTimeUpdate(data) {
+            const updatesContainer = document.getElementById('updatesContainer');
+            const timestamp = new Date().toLocaleTimeString();
+            
+            let updateMessage = '';
+            
+            if (data.type === 'case_processed') {
+                updateMessage = `✅ Case processed successfully!`;
+                if (data.result.appointment_details) {
+                    const apt = data.result.appointment_details;
+                    updateMessage += ` Appointment scheduled at ${apt.service_name} for ${new Date(apt.scheduled_time).toLocaleString()}`;
+                }
+                
+                // Show success notification
+                showNotification('Your case has been processed and appointment scheduled!', 'success');
+                
+                // Reload cases to show updated status
+                setTimeout(() => loadCases(), 2000);
+            } else if (data.type === 'case_error') {
+                updateMessage = `❌ Error processing case: ${data.error}`;
+                showNotification('There was an error processing your case', 'error');
+            }
+
+            const updateElement = document.createElement('div');
+            updateElement.className = 'update-item';
+            updateElement.innerHTML = `
+                <div>${updateMessage}</div>
+                <div class="update-time">${timestamp}</div>
+            `;
+            
+            updatesContainer.insertBefore(updateElement, updatesContainer.firstChild);
+        }
+
+        // View case details
+        async function viewCaseDetails(caseId) {
+            try {
+                const response = await fetch(`${API_BASE}/cases/${caseId}`);
+                const caseData = await response.json();
+                
+                // Create modal or detailed view
+                showCaseModal(caseData);
+                
+            } catch (error) {
+                showNotification('Error loading case details', 'error');
+            }
+        }
+
+        // Show case details in modal
+        function showCaseModal(caseData) {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
+                background: rgba(0,0,0,0.7); z-index: 2000; display: flex; 
+                align-items: center; justify-content: center; padding: 20px;
+            `;
+            
+            const appointmentInfo = caseData.appointment ? `
+                <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                    <h4 style="color: #1976d2; margin-bottom: 10px;">📅 Appointment Details</h4>
+                    <p><strong>Time:</strong> ${new Date(caseData.appointment.scheduled_time).toLocaleString()}</p>
+                    <p><strong>Duration:</strong> ${caseData.appointment.duration_minutes} minutes</p>
+                    <p><strong>Status:</strong> ${caseData.appointment.confirmation_sent ? '✅ Confirmed' : '⏳ Pending'}</p>
+                </div>
+            ` : '<div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0;"><p>⏳ No appointment scheduled yet</p></div>';
+            
+            const serviceInfo = caseData.assigned_service ? `
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                    <h4 style="color: #28a745; margin-bottom: 10px;">🏥 Assigned Service</h4>
+                    <p><strong>Service:</strong> ${caseData.assigned_service.name}</p>
+                    <p><strong>Location:</strong> ${caseData.assigned_service.location}</p>
+                    <p><strong>Contact:</strong> ${caseData.assigned_service.contact}</p>
+                </div>
+            ` : '<div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0;"><p>⏳ Service assignment in progress</p></div>';
+            
+            modal.innerHTML = `
+                <div style="background: white; border-radius: 20px; max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto;">
+                    <div style="background: linear-gradient(135deg, #2196F3, #21CBF3); color: white; padding: 25px; border-radius: 20px 20px 0 0;">
+                        <h2 style="margin: 0;">Case Details #${caseData.id}</h2>
+                        <p style="margin: 5px 0 0; opacity: 0.9;">${caseData.title}</p>
+                    </div>
+                    
+                    <div style="padding: 30px;">
+                        <div style="margin-bottom: 20px;">
+                            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                                <span class="status-badge status-${caseData.status}">${caseData.status}</span>
+                                <span class="status-badge urgency-${caseData.urgency}" style="background: ${getUrgencyColor(caseData.urgency)}; color: white;">${caseData.urgency.toUpperCase()}</span>
+                            </div>
+                            <p style="color: #666; line-height: 1.6;">${caseData.description}</p>
+                        </div>
+                        
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                            <h4 style="color: #495057; margin-bottom: 10px;">👤 Citizen Information</h4>
+                            <p><strong>Name:</strong> ${caseData.citizen.name}</p>
+                            <p><strong>Email:</strong> ${caseData.citizen.email}</p>
+                            <p><strong>Phone:</strong> ${caseData.citizen.phone || 'Not provided'}</p>
+                        </div>
+                        
+                        ${serviceInfo}
+                        ${appointmentInfo}
+                        
+                        ${caseData.updates && caseData.updates.length > 0 ? `
+                            <div style="margin: 20px 0;">
+                                <h4 style="color: #495057; margin-bottom: 15px;">📋 Case Updates</h4>
+                                ${caseData.updates.map(update => `
+                                    <div style="border-left: 3px solid #2196F3; padding-left: 15px; margin-bottom: 15px;">
+                                        <p style="margin: 0; color: #333;">${update.message}</p>
+                                        <small style="color: #888;">
+                                            ${update.agent} agent • ${new Date(update.created_at).toLocaleString()}
+                                        </small>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                        
+                        <div style="text-align: center; margin-top: 30px;">
+                            <button onclick="this.parentElement.parentElement.parentElement.parentElement.remove()" 
+                                    class="btn" style="background: #6c757d;">
+                                Close
+                            </button>
+                            ${caseData.status === 'scheduled' ? `
+                                <button onclick="connectWebSocket(${caseData.id}); this.parentElement.parentElement.parentElement.parentElement.remove();" 
+                                        class="btn" style="margin-left: 10px;">
+                                    Track Live Updates
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Close modal when clicking outside
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+        }
+
+        // Get urgency color
+        function getUrgencyColor(urgency) {
+            const colors = {
+                'critical': '#dc3545',
+                'high': '#fd7e14', 
+                'medium': '#ffc107',
+                'low': '#28a745'
+            };
+            return colors[urgency] || '#6c757d';
+        }
+
+        // Show notification
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 5000);
+        }
+
+        // Sample case templates for quick testing
+        function useSampleCase(type) {
+            const samples = {
+                medical: {
+                    title: "Severe headache and fever",
+                    description: "I have been experiencing severe headaches and high fever for the past 2 days. The pain is getting worse and I'm feeling dizzy. I need medical attention urgently."
+                },
+                emergency: {
+                    title: "Car accident - minor injuries",
+                    description: "I was involved in a minor car accident. I have some cuts and bruises but nothing seems broken. I need to file a report and get medical clearance."
+                },
+                social: {
+                    title: "Housing assistance needed",
+                    description: "I recently lost my job and am struggling to pay rent. I need information about housing assistance programs and emergency financial aid."
+                },
+                administrative: {
+                    title: "Driver's license renewal",
+                    description: "I need to renew my driver's license which expires next month. I would like to schedule an appointment at the DMV office."
+                }
+            };
+            
+            if (samples[type]) {
+                document.getElementById('title').value = samples[type].title;
+                document.getElementById('description').value = samples[type].description;
+                showNotification(`Sample ${type} case loaded - you can modify it before submitting`, 'success');
+            }
+        }
+
+        // Add sample case buttons (for testing)
+        window.addEventListener('load', function() {
+            const formSection = document.querySelector('.form-section');
+            const sampleDiv = document.createElement('div');
+            sampleDiv.innerHTML = `
+                <div style="margin: 20px 0; padding: 20px; background: #f8f9fa; border-radius: 10px; border: 1px dashed #dee2e6;">
+                    <h4 style="margin-bottom: 15px; color: #495057;">🚀 Quick Test Cases</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
+                        <button type="button" onclick="useSampleCase('medical')" class="btn" style="font-size: 14px; padding: 10px;">Medical Emergency</button>
+                        <button type="button" onclick="useSampleCase('emergency')" class="btn" style="font-size: 14px; padding: 10px;">Emergency Report</button>
+                        <button type="button" onclick="useSampleCase('social')" class="btn" style="font-size: 14px; padding: 10px;">Social Services</button>
+                        <button type="button" onclick="useSampleCase('administrative')" class="btn" style="font-size: 14px; padding: 10px;">Administrative</button>
+                    </div>
+                </div>
+            `;
+            formSection.appendChild(sampleDiv);
+        });
+    </script>
+</body>
+</html>
