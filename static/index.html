@@ -333,7 +333,7 @@
     <div id="notification" class="notification"></div>
 
     <script>
-        const API_BASE = 'http://localhost:8000/api';
+        const API_BASE = 'innovista-hackathon-fasdt-api.vercel.app/api';
         let currentCaseId = null;
         let websocket = null;
 
@@ -468,7 +468,7 @@
             }
 
             try {
-                websocket = new WebSocket(`ws://localhost:8000/ws/${caseId}`);
+                websocket = new WebSocket(`ws://innovista-hackathon-fasdt-api.vercel.app/ws/${caseId}`);
                 
                 websocket.onopen = function() {
                     console.log('WebSocket connected for case:', caseId);
